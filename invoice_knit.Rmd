@@ -8,7 +8,7 @@ params:
   proj_path:
     value: "/Users/mf/2014_and_beyond/Side_projects/jiuJitsuCoaching/"
   file_name:
-    value: "invoice_8.csv"
+    value: "invoice_11.csv"
   private_rate:
     value: 44.8
   client:
@@ -55,16 +55,6 @@ colnames(hour_table) = gsub("_", " ", colnames(hour_table))
 kable(hour_table, caption = "Tracked Hours")
 ```
 
----
-
-```{r Privates-section, echo = FALSE}
-hour_table = fread(paste(params$proj_path,params$file_name, sep=""),stringsAsFactors=F)
-hour_table = hour_table[grepl("Private", Comments)]
-hour_table[,'Hours_worked'] = round(hour_table[,'Hours_worked'],2)
-totalHoursPrivates = sum(hour_table[,params$hourColumn, with=F])
-colnames(hour_table) = gsub("_", " ", colnames(hour_table))
-kable(hour_table, caption = "Tracked Hours For Privates")
-```
 
 ---
 
@@ -74,9 +64,7 @@ kable(hour_table, caption = "Tracked Hours For Privates")
 |For|SBG Coaching||||
 |Total Hours Teaching|`r totalHours`||||
 |Rate|$`r params$rate`/hr||||
-|Total Hours Privates|`r totalHoursPrivates`||||
-|Private Lesson Rate (after renewal discount and SBG share deducted)|$`r params$private_rate`/hr||||
-|Amount Due|$`r (totalHours * params$rate)+(totalHoursPrivates * params$private_rate)`||||
+|Amount Due|$`r (totalHours * params$rate)`||||
 |Payment Method|Check or PayPal: mark.aaron.fisher@gmail.com||||
 
 ---
