@@ -10,7 +10,7 @@ params:
   private_rate:
     value: 44.8
   client:
-    value: "SBG Portland"
+    value: "Straight Blast Gym"
   hourColumn:
     value: "Hours_worked"
   rate:
