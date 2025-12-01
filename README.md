@@ -1,5 +1,5 @@
 # knitr_invoice_generator
-A knitr report meant to automate generation of contract invoices
+A tool meant to automate generation of contract invoices. Make with a combination of R (using knitr) and Python.
 
 ## Usage
 
