@@ -202,11 +202,9 @@ def send_email_with_attachment(pdf_path: str, subject: str, body: str):
 def main(year: int = None, month: int = None):
     today = date.today()
     if year is None or month is None:
-        # default to previous month
-        first_this_month = date(today.year, today.month, 1)
-        last_month_last_day = first_this_month - timedelta(days=1)
-        year = last_month_last_day.year
-        month = last_month_last_day.month
+        # default to current month
+        year = today.year
+        month = today.month
 
     creds = get_credentials()
     service = build("calendar", "v3", credentials=creds)
