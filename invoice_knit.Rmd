@@ -1,10 +1,10 @@
 ---
 output:
-  html_document:
-    toc: false
-    toc_depth: 2
-    theme: united
+  pdf_document:        # switch from html_document (if that is there)
+    latex_engine: xelatex
 params:
+  csv_path: "sbg_invoice_26_aug_2025.csv"
+  invoice_date: "!r Sys.Date()"
   proj_path:
     value: "/Users/mf/2014_and_beyond/Side_projects/jiuJitsuCoaching/"
   file_name:
@@ -47,7 +47,7 @@ Portland, OR 97203
 ---
 
 ```{r Main-section, echo = FALSE}
-hour_table = fread(paste(params$proj_path,params$file_name, sep=""),stringsAsFactors=F)
+hour_table = read.csv(params$csv_path, stringsAsFactors = FALSE)
 hour_table = hour_table[!grepl("Private", Comments)]
 # hour_table[,'Hours_worked', ] = round(hour_table[,'Hours_worked'],2)
 totalHours = sum(hour_table[,params$hourColumn, with=F])
