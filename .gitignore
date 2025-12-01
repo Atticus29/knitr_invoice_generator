@@ -1,5 +1,13 @@
 invoice*
 fisher*
+sbg_invoice_*
 .RData
 .Rhistory
 .DS_Store
+
+# Environment variables
+.env
+
+# Google OAuth credentials
+credentials.json
+token.json

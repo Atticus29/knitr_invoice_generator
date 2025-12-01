@@ -1,18 +1,16 @@
 ---
 output:
   html_document:
-    toc: false
-    toc_depth: 2
-    theme: united
+    self_contained: true
 params:
+  csv_path: "sbg_invoice_26_aug_2025.csv"
+  invoice_date: "!r Sys.Date()"
   proj_path:
-    value: "/Users/mf/2014_and_beyond/Side_projects/jiuJitsuCoaching/"
-  file_name:
-    value: "invoice_11.csv"
+    value: "/Users/markfisher/Desktop/knitr_invoice_generator/"
   private_rate:
     value: 44.8
   client:
-    value: "SBG Portland"
+    value: "Straight Blast Gym"
   hourColumn:
     value: "Hours_worked"
   rate:
@@ -20,7 +18,7 @@ params:
 ---
 
 ---
-title: `r paste0(paste0("Invoice - ",month.abb[month(Sys.Date())]),format(Sys.Date(), ", %Y"))`
+title: `r paste0("Invoice - ", format(Sys.Date(), "%B, %Y"))`
 ---
 
 ```{r setup, include=FALSE}
@@ -29,6 +27,7 @@ knitr::opts_chunk$set(echo = TRUE,  results='show', warning=FALSE, message=FALSE
 
 ```{r The_Libraries_Are_Open, echo = FALSE}
 library(knitr)
+library(lubridate)
 require(data.table)
 mainwd <- file.path(params$proj_path)
 output_directory <- mainwd
@@ -47,10 +46,10 @@ Portland, OR 97203
 ---
 
 ```{r Main-section, echo = FALSE}
-hour_table = fread(paste(params$proj_path,params$file_name, sep=""),stringsAsFactors=F)
-hour_table = hour_table[!grepl("Private", Comments)]
+hour_table = read.csv(params$csv_path, stringsAsFactors = FALSE)
+hour_table = hour_table[!grepl("Private", hour_table$Comments),]
 # hour_table[,'Hours_worked', ] = round(hour_table[,'Hours_worked'],2)
-totalHours = sum(hour_table[,params$hourColumn, with=F])
+totalHours = sum(hour_table[,params$hourColumn])
 colnames(hour_table) = gsub("_", " ", colnames(hour_table))
 kable(hour_table, caption = "Tracked Hours")
 ```
