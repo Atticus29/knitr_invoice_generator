@@ -1,6 +1,28 @@
 # knitr_invoice_generator
 A knitr report meant to automate generation of contract invoices
 
+## Usage
+
+The invoice generator can be run with optional month and year parameters:
+
+```bash
+# Generate invoice for current month
+python generate_and_send_invoice.py
+
+# Generate invoice for specific month of current year
+python generate_and_send_invoice.py -m 10
+
+# Generate invoice for specific month and year
+python generate_and_send_invoice.py -m 10 -y 2024
+
+# Using long form options
+python generate_and_send_invoice.py --month 12 --year 2023
+```
+
+If no parameters are provided, the script defaults to generating an invoice for the current month.
+
+## Configuration
+
 Modify parameters in top section of "invoice_knit.Rmd" to suit your use case, including hourly rates (one for general teaching, one for private lessons).
 Takes as input a csv file. For example:
 

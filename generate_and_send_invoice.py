@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import csv
 import os
 import subprocess
@@ -232,7 +233,44 @@ def main(year: int = None, month: int = None):
     print(f"Generated and emailed invoice: {pdf_path}")
 
 
+def parse_arguments():
+    """Parse command line arguments for month and year."""
+    parser = argparse.ArgumentParser(
+        description="Generate and send invoice from Google Calendar events",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python generate_and_send_invoice.py                    # Current month
+  python generate_and_send_invoice.py -m 10              # October of current year
+  python generate_and_send_invoice.py -m 10 -y 2024      # October 2024
+  python generate_and_send_invoice.py --month 12 --year 2023  # December 2023
+        """
+    )
+    
+    parser.add_argument(
+        "-m", "--month",
+        type=int,
+        choices=range(1, 13),
+        help="Month (1-12). Defaults to current month if not specified."
+    )
+    
+    parser.add_argument(
+        "-y", "--year",
+        type=int,
+        help="Year (e.g., 2024). Defaults to current year if not specified."
+    )
+    
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    # You can call main(2025, 8) to force a specific month
-    main()
+    args = parse_arguments()
+    
+    # Use provided arguments or default to current month/year
+    today = date.today()
+    year = args.year if args.year is not None else today.year
+    month = args.month if args.month is not None else today.month
+    
+    print(f"Generating invoice for {date(year, month, 1).strftime('%B %Y')}")
+    main(year, month)
 
