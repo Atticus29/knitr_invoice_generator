@@ -6,9 +6,7 @@ params:
   csv_path: "sbg_invoice_26_aug_2025.csv"
   invoice_date: "!r Sys.Date()"
   proj_path:
-    value: "/Users/mf/2014_and_beyond/Side_projects/jiuJitsuCoaching/"
-  file_name:
-    value: "invoice_11.csv"
+    value: "/Users/markfisher/Desktop/knitr_invoice_generator/"
   private_rate:
     value: 44.8
   client:
