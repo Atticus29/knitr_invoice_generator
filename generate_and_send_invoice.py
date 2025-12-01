@@ -28,7 +28,7 @@ if not CALENDAR_ID:
     raise ValueError("CALENDAR_ID environment variable is required")
 
 # Where your R files live
-R_WORKING_DIR = "/Users/markfisher/Desktop/knitr_invoice_generator/"  # adjust path
+R_WORKING_DIR = "/Users/markfisher/knitr_invoice_generator/"  # adjust path
 WRAPPER_R = os.path.join(R_WORKING_DIR, "wrapper_for_knit.R")
 
 # Email settings
