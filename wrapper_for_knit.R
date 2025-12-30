@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+# Make sure pandoc is on PATH for Rscript runs (adjust the directory as needed)
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "/opt/homebrew/bin", sep = ":"))
+# or Sys.setenv(PATH = paste(Sys.getenv("PATH"), "/usr/local/bin", sep = ":"))
+
 suppressPackageStartupMessages({
   library(rmarkdown)
 })

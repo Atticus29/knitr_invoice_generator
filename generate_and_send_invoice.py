@@ -19,6 +19,8 @@ load_dotenv()
 
 # ================== CONFIG ==================
 
+R_SCRIPT = "/usr/local/bin/Rscript"  # <-- replace with your actual which Rscript
+
 # Scope for read-only access to calendar
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
@@ -67,8 +69,14 @@ def get_credentials(credential_path="credentials.json", token_path="token.json")
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                print(f"Failed to refresh credentials: {e}")
+                print("Re-authenticating...")
+                creds = None  # Force re-authentication
+        
+        if not creds:
             # Create credentials configuration from environment variables
             client_config = {
                 "installed": {
@@ -85,6 +93,7 @@ def get_credentials(credential_path="credentials.json", token_path="token.json")
             # First-time auth flow using the dynamically created config
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
             creds = flow.run_local_server(port=0)
+        
         with open(token_path, "w") as token:
             token.write(creds.to_json())
     return creds
@@ -167,7 +176,7 @@ def build_csv_from_events(events, csv_path: str):
 def run_r_invoice(csv_path: str, invoice_date: date, output_pdf: str):
     invoice_date_str = invoice_date.isoformat()
     cmd = [
-        "Rscript",
+        R_SCRIPT,
         WRAPPER_R,
         csv_path,
         invoice_date_str,
