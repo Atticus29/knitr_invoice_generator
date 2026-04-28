@@ -4,8 +4,11 @@ import argparse
 import csv
 import os
 import subprocess
-import smtplib
-from email.message import EmailMessage
+import base64
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 from datetime import datetime, date, timedelta
 
 from google.oauth2.credentials import Credentials
@@ -21,8 +24,11 @@ load_dotenv()
 
 R_SCRIPT = "/usr/local/bin/Rscript"  # <-- replace with your actual which Rscript
 
-# Scope for read-only access to calendar
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+# Scopes for read-only calendar access and sending email via Gmail API
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/gmail.send",
+]
 
 # Load configuration from environment variables
 CALENDAR_ID = os.getenv("CALENDAR_ID")
@@ -34,19 +40,14 @@ R_WORKING_DIR = "/Users/markfisher/knitr_invoice_generator/"  # adjust path
 WRAPPER_R = os.path.join(R_WORKING_DIR, "wrapper_for_knit.R")
 
 # Email settings
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
 FROM_EMAIL = os.getenv("FROM_EMAIL")
 TO_EMAIL = os.getenv("TO_EMAIL")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 # Validate required environment variables
 if not FROM_EMAIL:
     raise ValueError("FROM_EMAIL environment variable is required")
 if not TO_EMAIL:
     raise ValueError("TO_EMAIL environment variable is required")
-if not GMAIL_APP_PASSWORD:
-    raise ValueError("GMAIL_APP_PASSWORD environment variable is required")
 
 # Google OAuth credentials from environment
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -185,28 +186,26 @@ def run_r_invoice(csv_path: str, invoice_date: date, output_pdf: str):
     subprocess.run(cmd, check=True, cwd=R_WORKING_DIR)
 
 
-def send_email_with_attachment(pdf_path: str, subject: str, body: str):
-    msg = EmailMessage()
+def send_email_with_attachment(creds, pdf_path: str, subject: str, body: str):
+    msg = MIMEMultipart()
     msg["From"] = FROM_EMAIL
     msg["To"] = TO_EMAIL
     msg["Subject"] = subject
-    msg.set_content(body)
+    msg.attach(MIMEText(body, "plain"))
 
     with open(pdf_path, "rb") as f:
-        data = f.read()
-
-    filename = os.path.basename(pdf_path)
-    msg.add_attachment(
-        data,
-        maintype="application",
-        subtype="pdf",
-        filename=filename,
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(f.read())
+    encoders.encode_base64(part)
+    part.add_header(
+        "Content-Disposition",
+        f'attachment; filename="{os.path.basename(pdf_path)}"',
     )
+    msg.attach(part)
 
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
-        server.login(FROM_EMAIL, GMAIL_APP_PASSWORD)
-        server.send_message(msg)
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    gmail_service = build("gmail", "v1", credentials=creds)
+    gmail_service.users().messages().send(userId="me", body={"raw": raw}).execute()
 
 
 def main(year: int = None, month: int = None):
@@ -237,7 +236,7 @@ def main(year: int = None, month: int = None):
 
     subject = f"SBG Invoice for {invoice_date.strftime('%B %Y')}"
     body = f"Attached is your SBG invoice for {invoice_date.strftime('%B %Y')}."
-    send_email_with_attachment(pdf_path, subject, body)
+    send_email_with_attachment(creds, pdf_path, subject, body)
 
     print(f"Generated and emailed invoice: {pdf_path}")
 
