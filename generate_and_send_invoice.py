@@ -182,6 +182,9 @@ def run_r_invoice(csv_path: str, invoice_date: date, output_pdf: str):
         csv_path,
         invoice_date_str,
         output_pdf,
+        "BJJ Instruction Services Invoice",
+        "21",
+        "Straight Blast Gym",
     ]
     subprocess.run(cmd, check=True, cwd=R_WORKING_DIR)
 

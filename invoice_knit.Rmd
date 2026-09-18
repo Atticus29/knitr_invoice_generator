@@ -19,6 +19,8 @@ params:
     value: "Hours_worked"
   rate:
     value: 21
+  header_title:
+    value: "BJJ Instruction Services Invoice"
 ---
 
 ```{r setup, include=FALSE}
@@ -115,7 +117,7 @@ th {
 ```
 
 <div class="invoice-header">
-# BBJ Instruction Services Invoice
+# `r params$header_title`
 </div>
 
 <div class="contact-info">
@@ -161,7 +163,7 @@ invoice_summary <- data.frame(
     params$client,
     format(Sys.Date(), "%B %d, %Y"),
     format(Sys.Date(), "%B %Y"),
-    "BJJ Coaching and Instruction Services",
+    params$header_title,
     sprintf("%.2f", totalHours),
     paste0("$", sprintf("%.2f", params$rate)),
     paste0("$", sprintf("%.2f", totalHours * params$rate)),
