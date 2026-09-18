@@ -45,6 +45,9 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
+# This invoice is for UFI by default; override with --project for another client.
+DEFAULT_PROJECT = os.getenv("TOGGL_PROJECT", "UFI")
+
 # ==================================================
 
 
@@ -101,14 +104,19 @@ def parse_toggl_date(date_str: str) -> date:
     return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 
-def read_toggl_entries(toggl_csv_path: str):
+def read_toggl_entries(toggl_csv_path: str, project: str | None = None):
     entries = []
     with open(toggl_csv_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            entries.append(row)
+            if project is None or row.get("Project", "").strip() == project:
+                entries.append(row)
     if not entries:
-        raise ValueError(f"No entries found in {toggl_csv_path}")
+        if project is None:
+            raise ValueError(f"No entries found in {toggl_csv_path}")
+        raise ValueError(
+            f"No entries for project {project!r} found in {toggl_csv_path}"
+        )
     return entries
 
 
@@ -172,8 +180,12 @@ def send_email_with_attachment(creds, pdf_path: str, subject: str, body: str):
     gmail_service.users().messages().send(userId="me", body={"raw": raw}).execute()
 
 
-def main(toggl_csv_path: str, send_email: bool = True):
-    entries = read_toggl_entries(toggl_csv_path)
+def main(
+    toggl_csv_path: str,
+    send_email: bool = True,
+    project: str | None = DEFAULT_PROJECT,
+):
+    entries = read_toggl_entries(toggl_csv_path, project=project)
     invoice_date = invoice_month_from_entries(entries)
     month_name = invoice_date.strftime("%b").lower()
     csv_name = f"ufi_invoice_{invoice_date.day}_{month_name}_{invoice_date.year}.csv"
@@ -217,9 +229,18 @@ Examples:
         help="Generate the invoice PDF but don't send it via email",
     )
 
+    parser.add_argument(
+        "--project",
+        default=DEFAULT_PROJECT,
+        help=(
+            "Only include rows whose Project exactly matches this value "
+            f"(default: {DEFAULT_PROJECT})"
+        ),
+    )
+
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(args.toggl_csv, send_email=not args.no_email)
+    main(args.toggl_csv, send_email=not args.no_email, project=args.project)
