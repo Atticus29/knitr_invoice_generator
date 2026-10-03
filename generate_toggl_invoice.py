@@ -138,7 +138,12 @@ def invoice_month_from_entries(entries) -> date:
     return date(earliest.year, earliest.month, 1)
 
 
-def run_r_invoice(csv_path: str, invoice_date: date, output_pdf: str):
+def run_r_invoice(
+    csv_path: str,
+    invoice_date: date,
+    output_pdf: str,
+    service_period: date | None = None,
+):
     invoice_date_str = invoice_date.isoformat()
     cmd = [
         R_SCRIPT,
@@ -150,6 +155,8 @@ def run_r_invoice(csv_path: str, invoice_date: date, output_pdf: str):
         "50",
         "Urban Forest Institute",
     ]
+    if service_period is not None:
+        cmd.append(service_period.isoformat())
     subprocess.run(cmd, check=True, cwd=R_WORKING_DIR)
 
 
@@ -184,6 +191,7 @@ def main(
     toggl_csv_path: str,
     send_email: bool = True,
     project: str | None = DEFAULT_PROJECT,
+    service_period: date | None = None,
 ):
     entries = read_toggl_entries(toggl_csv_path, project=project)
     invoice_date = invoice_month_from_entries(entries)
@@ -195,7 +203,7 @@ def main(
     pdf_path = os.path.join(R_WORKING_DIR, pdf_name)
 
     build_csv_from_toggl_entries(entries, csv_path)
-    run_r_invoice(csv_path, invoice_date, pdf_path)
+    run_r_invoice(csv_path, invoice_date, pdf_path, service_period=service_period)
 
     print(f"Generated invoice: {pdf_path}")
 
@@ -207,6 +215,15 @@ def main(
         print("Emailed invoice.")
 
 
+def parse_service_period(value: str) -> date:
+    try:
+        return date.fromisoformat(f"{value}-01")
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "service period must be in YYYY-MM format"
+        ) from exc
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Generate (and optionally send) an invoice from a Toggl Track detailed CSV export",
@@ -215,6 +232,7 @@ def parse_arguments():
 Examples:
   python generate_toggl_invoice.py toggl_export.csv
   python generate_toggl_invoice.py toggl_export.csv --no-email
+  python generate_toggl_invoice.py toggl_export.csv --service-period 2026-09
         """
     )
 
@@ -238,9 +256,21 @@ Examples:
         ),
     )
 
+    parser.add_argument(
+        "--service-period",
+        type=parse_service_period,
+        metavar="YYYY-MM",
+        help="Month shown in the PDF Service Period section (defaults to the current month)",
+    )
+
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(args.toggl_csv, send_email=not args.no_email, project=args.project)
+    main(
+        args.toggl_csv,
+        send_email=not args.no_email,
+        project=args.project,
+        service_period=args.service_period,
+    )

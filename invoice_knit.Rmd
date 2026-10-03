@@ -9,6 +9,7 @@ output:
 params:
   csv_path: "sbg_invoice_26_aug_2025.csv"
   invoice_date: "!r Sys.Date()"
+  service_period: "!r Sys.Date()"
   proj_path:
     value: "/Users/markfisher/knitr_invoice_generator/"
   private_rate:
@@ -162,7 +163,7 @@ invoice_summary <- data.frame(
   Details = c(
     params$client,
     format(Sys.Date(), "%B %d, %Y"),
-    format(Sys.Date(), "%B %Y"),
+    format(as.Date(params$service_period), "%B %Y"),
     params$header_title,
     sprintf("%.2f", totalHours),
     paste0("$", sprintf("%.2f", params$rate)),
@@ -183,5 +184,4 @@ kable(
   align = c("l", "l")
 )
 ```
-
 

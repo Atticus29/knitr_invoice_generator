@@ -21,6 +21,22 @@ python generate_and_send_invoice.py --month 12 --year 2023
 
 If no parameters are provided, the script defaults to generating an invoice for the current month.
 
+## Toggl invoice
+
+To generate an invoice from a Toggl CSV export without sending it by email:
+
+```bash
+python generate_toggl_invoice.py toggl_export.csv --no-email
+```
+
+Override the month shown in the PDF's Service Period section with `--service-period YYYY-MM`:
+
+```bash
+python generate_toggl_invoice.py toggl_export.csv --service-period 2026-09 --no-email
+```
+
+Without `--service-period`, the Service Period defaults to the current month.
+
 ## Configuration
 
 Modify parameters in top section of "invoice_knit.Rmd" to suit your use case, including hourly rates (one for general teaching, one for private lessons).
@@ -38,4 +54,3 @@ Date_or_date_range,Hours_worked,Comments
 >>>
 
 Current instantiation of the code will isolate lines where the comments column contains the word, "Private", populate a separate table with just them, and charge them the separate private rate.
-
