@@ -37,6 +37,10 @@ python generate_toggl_invoice.py toggl_export.csv --service-period 2026-09 --no-
 
 Without `--service-period`, the Service Period defaults to the current month.
 
+The PDF's **Services Provided** summary value is configured separately from its
+invoice title. Toggl/UFI invoices use "Software Development"; Portland and
+Vancouver SBG invoices use "Brazilian Jiu Jitsu Instruction".
+
 ## Configuration
 
 Modify parameters in top section of "invoice_knit.Rmd" to suit your use case, including hourly rates (one for general teaching, one for private lessons).

@@ -154,9 +154,9 @@ def run_r_invoice(
         "UFI Software Development Services Invoice",
         "50",
         "Urban Forest Institute",
+        (service_period or date.today()).isoformat(),
+        "Software Development",
     ]
-    if service_period is not None:
-        cmd.append(service_period.isoformat())
     subprocess.run(cmd, check=True, cwd=R_WORKING_DIR)
 
 

@@ -22,6 +22,8 @@ params:
     value: 21
   header_title:
     value: "BJJ Instruction Services Invoice"
+  services_provided:
+    value: "Brazilian Jiu Jitsu Instruction"
 ---
 
 ```{r setup, include=FALSE}
@@ -149,10 +151,34 @@ hour_table[, "Hours worked"] <- round(hour_table[, "Hours worked"], 2)
 ## Time Tracking Details
 
 ```{r hours-table}
-kable(
-  hour_table, 
-  caption = "Detailed Hours Breakdown"
-)
+if (knitr::is_latex_output()) {
+  hours_table <- kable(
+    hour_table,
+    format = "latex",
+    caption = "Detailed Hours Breakdown",
+    col.names = c("Date", "Hours", "Comments"),
+    align = c("l", "l", "l"),
+    longtable = TRUE
+  )
+  column_widths <- paste0(
+    "@{}p{0.22\\linewidth}@{\\hspace{0.03\\linewidth}}",
+    "p{0.11\\linewidth}@{\\hspace{0.03\\linewidth}}",
+    "p{0.61\\linewidth}@{}"
+  )
+  hours_table <- sub(
+    "{l|l|l}",
+    paste0("{", column_widths, "}"),
+    hours_table,
+    fixed = TRUE
+  )
+  cat(hours_table)
+} else {
+  kable(
+    hour_table,
+    caption = "Detailed Hours Breakdown",
+    col.names = c("Date", "Hours", "Comments")
+  )
+}
 ```
 
 ```{r invoice-summary-data}
@@ -164,7 +190,7 @@ invoice_summary <- data.frame(
     params$client,
     format(Sys.Date(), "%B %d, %Y"),
     format(as.Date(params$service_period), "%B %Y"),
-    params$header_title,
+    params$services_provided,
     sprintf("%.2f", totalHours),
     paste0("$", sprintf("%.2f", params$rate)),
     paste0("$", sprintf("%.2f", totalHours * params$rate)),
@@ -184,4 +210,3 @@ kable(
   align = c("l", "l")
 )
 ```
-
